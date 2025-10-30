@@ -15,6 +15,8 @@ contract DynamicgasFee is BaseHook{
 
         uint128 public movingAvarageGasPrice;
         uint104 public movingAverageGasPriceCount;
+
+        error MustHaveDynamicFee();
         constructor(IPoolManager) BaseHook(_manager){
 
         }
@@ -37,5 +39,10 @@ contract DynamicgasFee is BaseHook{
                 afterAddLiquidityReturnDelta: false,
                 afterRemoveLiquidityReturnDelta: false
             });
+        }
+
+        function _beforeInitialize(address , PoolKey callData key , uint160 sqrtPriceX96) internal pure override reurns(bytes4){
+            if(!key.fee.isDynamic()) revert MustHaveDynamicFee();
+            return this.beforeInitialize.selector;
         }
 }
