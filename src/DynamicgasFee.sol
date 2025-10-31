@@ -46,7 +46,14 @@ contract DynamicgasFee is BaseHook{
             return this.beforeInitialize.selector;
         }
 
-        function _beforeSwap(address,PoolKey callData key , SwapParams , bytes) internal override returns (bytes4, BeforeSwapDelta, uint24){
-            
+        function _beforeSwap(address,PoolKey callData key , SwapParams , bytes) internal view override returns (bytes4, BeforeSwapDelta, uint24){
+            uint24 fee = getFee();
+        
+        uint24 feeWithFlag = fee | LPFeeLibrary.OVERRIDE_FEE_FLAG;
+        return (
+            this.beforeSwap.selector,
+            BeforeSwapDeltaLibrary.ZERO_DELTA,
+            feeWithFlag
+        );
         } 
 }
