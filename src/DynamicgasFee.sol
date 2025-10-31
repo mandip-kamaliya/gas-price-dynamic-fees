@@ -45,4 +45,8 @@ contract DynamicgasFee is BaseHook{
             if(!key.fee.isDynamic()) revert MustHaveDynamicFee();
             return this.beforeInitialize.selector;
         }
+
+        function _beforeSwap(address,PoolKey callData key , SwapParams , bytes) internal override returns (bytes4, BeforeSwapDelta, uint24){
+            
+        } 
 }
