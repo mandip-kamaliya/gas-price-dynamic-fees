@@ -64,7 +64,21 @@ contract DynamicgasFee is BaseHook {
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, feeWithFlag);
     }
 
-    function getFee() internal view returns (uint24) {}
+    function getFee() internal view returns (uint24) {
+        uint128 gasPrice = uint128(tx.gasprice);
+
+        // if gasPrice > movingAverageGasPrice * 1.1, then half the fees
+        if (gasPrice > (movingAvarageGasPrice * 11) / 10) {
+            return BASE_FEE / 2;
+        }
+
+        // if gasPrice < movingAverageGasPrice * 0.9, then double the fees
+        if (gasPrice < (movingAvarageGasPrice * 9) / 10) {
+            return BASE_FEE * 2;
+        }
+
+        return BASE_FEE;
+    }
 
     function updateMovingAverage() internal {
         uint128 gasPrice = uint128(tx.gasprice);
