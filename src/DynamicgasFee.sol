@@ -42,17 +42,12 @@ contract DynamicgasFee is BaseHook {
         });
     }
 
-    function _beforeInitialize(address, PoolKey calldata key, uint160 sqrtPriceX96)
-        internal
-        pure
-        override
-        returns (bytes4)
-    {
+    function _beforeInitialize(address, PoolKey calldata key, uint160) internal pure override returns (bytes4) {
         if (!key.fee.isDynamicFee()) revert MustHaveDynamicFee();
         return this.beforeInitialize.selector;
     }
 
-    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
+    function _beforeSwap(address, PoolKey calldata, SwapParams calldata, bytes calldata)
         internal
         view
         override
