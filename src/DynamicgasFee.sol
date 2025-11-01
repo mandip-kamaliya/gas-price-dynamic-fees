@@ -15,13 +15,14 @@ contract DynamicgasFee is BaseHook{
 
         uint128 public movingAvarageGasPrice;
         uint104 public movingAverageGasPriceCount;
+        uint24 public constant BASE_FEE = 5000;
 
         error MustHaveDynamicFee();
-        constructor(IPoolManager) BaseHook(_manager){
-
+        constructor(IPoolManager _poolManager) BaseHook(_poolManager){
+            updateMovingAverage();
         }
 
-        function getHookPermissions() public pure override returns(Hooks.permissions.memory){
+        function getHookPermissions() public pure override returns(Hooks.Permissions memory){
               return
             Hooks.Permissions({
                 beforeInitialize: true,
@@ -41,12 +42,12 @@ contract DynamicgasFee is BaseHook{
             });
         }
 
-        function _beforeInitialize(address , PoolKey callData key , uint160 sqrtPriceX96) internal pure override reurns(bytes4){
+        function _beforeInitialize(address , PoolKey calldata key , uint160 sqrtPriceX96) internal pure override returns(bytes4){
             if(!key.fee.isDynamic()) revert MustHaveDynamicFee();
             return this.beforeInitialize.selector;
         }
 
-        function _beforeSwap(address,PoolKey callData key , SwapParams , bytes) internal view override returns (bytes4, BeforeSwapDelta, uint24){
+        function _beforeSwap(address,PoolKey calldata key , SwapParams , bytes) internal view override returns (bytes4, BeforeSwapDelta, uint24){
             uint24 fee = getFee();
         
         uint24 feeWithFlag = fee | LPFeeLibrary.OVERRIDE_FEE_FLAG;
@@ -56,4 +57,10 @@ contract DynamicgasFee is BaseHook{
             feeWithFlag
         );
         } 
+
+        function updateMovingAverage() internal {
+            uint128 gasPrice = uint128(tx.gasPrice);
+
+            movingAvarageGasPrice = ((movingAvarageGasPrice * movingAverageGasPriceCount) + gasPrice) / (movingAverageGasPriceCount + 1 );
+        }
 }
