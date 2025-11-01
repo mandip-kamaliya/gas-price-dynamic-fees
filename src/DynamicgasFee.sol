@@ -48,11 +48,11 @@ contract DynamicgasFee is BaseHook {
         override
         returns (bytes4)
     {
-        if (!key.fee.isDynamic()) revert MustHaveDynamicFee();
+        if (!key.fee.isDynamicFee()) revert MustHaveDynamicFee();
         return this.beforeInitialize.selector;
     }
 
-    function _beforeSwap(address, PoolKey calldata key, SwapParams, bytes)
+    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
         internal
         view
         override
@@ -64,8 +64,10 @@ contract DynamicgasFee is BaseHook {
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, feeWithFlag);
     }
 
+    function getFee() internal view returns (uint24) {}
+
     function updateMovingAverage() internal {
-        uint128 gasPrice = uint128(tx.gasPrice);
+        uint128 gasPrice = uint128(tx.gasprice);
 
         movingAvarageGasPrice =
             ((movingAvarageGasPrice * movingAverageGasPriceCount) + gasPrice) / (movingAverageGasPriceCount + 1);
